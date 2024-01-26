@@ -1,2 +1,2 @@
 # Proyecto-Restaurante
-Sistema para la roma de pedidos de un restaurante
+Sistema para la toma de pedidos de un restaurante
