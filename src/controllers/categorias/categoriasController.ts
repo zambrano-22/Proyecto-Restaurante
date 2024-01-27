@@ -17,7 +17,11 @@ const getMethodById = async(req: Request, res: Response) => {
     const {id} = req.params;
     try {
         const result = await prisma.categorias.findUnique({where: {id: parseInt(id)}});
-        return res.status(200).json(result);
+        if (result) {
+            return res.status(200).json(result);
+        }
+        return res.status(404).json({message: 'La categoria buscada no existe'});
+
     } catch (error) {
         console.log("error::controller::categorias", error);
         return res.status(500).json(error);
@@ -53,10 +57,18 @@ const putMethod = async(req: Request, res: Response) => {
 const deleteMethod = async(req: Request, res: Response) => {
     const {id} = req.params;
     try {
+        //procedo a buscar
+        const exists = await prisma.categorias.findUnique({
+            where: {id: parseInt(id)}
+        });
+        if (exists) {
         const result = await prisma.categorias.delete({
             where: {id: parseInt(id)}
         });
         return res.status(200).json(result);
+        }
+        return res.status(404).json({message: 'La categoria que intenta eliminar, no existe'});
+
     } catch (error) {
         console.log("error::controller::categorias", error);
         return res.status(500).json(error);
