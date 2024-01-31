@@ -25,6 +25,34 @@ const getMethodById = async(req: Request, res: Response) => {
     }
 }
 
+const loginMethod = async(req: Request, res: Response) => {
+    try {
+        const {body} = req;
+        //primero que exista en la base de datos
+        const exists = await prisma.usuarios.findUnique({where: {correo: body.correo}});
+        if (!exists) return res.status(400).json({message: 'El usuario no extiste'});
+        //Validar la contraseña
+        const isValidPassword = await bcrypy.compare(body.clave, exists.clave);
+        if (!isValidPassword) return res.status(400).json({message: 'La contraseña es invalida'});
+
+        //Generar el paylod para el token
+        const payload = {
+            id: exists.id,
+            nombre: exists.nombre,
+            apellido: exists.apellido,
+            role: exists.role
+        }
+
+        //Generar y firmar el token
+        const token = jwt.sign(payload, 'u-cataluyan-2023', {expiresIn: '1h'});
+        return res.status(200).json({jwt: token, userData: payload});
+
+    } catch (error) {
+        console.log("error::controller::usuarios", error);
+        return res.status(500).json(error);
+    }
+}
+
 const postMethod = async(req: Request, res: Response) => {
     try {
         const {body} = req;
@@ -75,6 +103,7 @@ const deleteMethod = async(req: Request, res: Response) => {
 export{
     getMethod,
     getMethodById,
+    loginMethod,
     postMethod,
     putMethod,
     deleteMethod
